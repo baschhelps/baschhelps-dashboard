@@ -26,7 +26,7 @@ select { padding:10px; margin:10px; }
 <div class="section"><h3>Growth Chart</h3><canvas id="chart"></canvas></div>
 <div class="section"><h3>Funding Simulation</h3><input type="range" id="slider" min="0" max="50000" step="1000"><p id="simulation"></p></div>
 <script>
-const DATA_URL = "PASTE_YOUR_GOOGLE_SHEET_CSV_URL";
+const DATA_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRSxxdiGvLpUVB-_aq8iJbMqEYfezSRcG9Xzig5GMvh7SHyJq9gs_Rg_wUev8xgIMD-HJrJM-oQ8SM9/pubhtml";
 fetch(DATA_URL).then(r=>r.text()).then(csv=>{
  const rows = csv.split("
 ").slice(1);
