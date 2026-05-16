@@ -1,0 +1,52 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Basch Helps Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+body { font-family: Arial; background:#f7f8fa; padding:30px; }
+.section { background:white; padding:20px; border-radius:14px; margin-bottom:20px; box-shadow:0 10px 30px rgba(0,0,0,0.05);} 
+h1 { color:#31704B; }
+.kpis { display:grid; grid-template-columns:repeat(4,1fr); gap:15px; }
+.kpi { text-align:center; font-size:22px; color:#31704B; }
+button { padding:10px 15px; margin:5px; border:none; border-radius:8px; background:#f61d25; color:white; cursor:pointer; }
+button:hover { background:#c5161c; }
+select { padding:10px; margin:10px; }
+</style>
+</head>
+<body>
+<h1>Basch Helps Impact Dashboard</h1>
+<div class="section kpis" id="kpis"></div>
+<div class="section"><h3>London Borough Map</h3><object data="london-map.svg" type="image/svg+xml" width="100%"></object></div>
+<div class="section"><h3>Select Borough</h3><select id="boroughSelect"></select><div id="boroughResult"></div></div>
+<div class="section"><h3>Parent Eligibility Tool</h3><div id="parentTool"></div></div>
+<div class="section"><h3>Referral Tool</h3><div id="referralTool"></div></div>
+<div class="section"><h3>Growth Chart</h3><canvas id="chart"></canvas></div>
+<div class="section"><h3>Funding Simulation</h3><input type="range" id="slider" min="0" max="50000" step="1000"><p id="simulation"></p></div>
+<script>
+const DATA_URL = "PASTE_YOUR_GOOGLE_SHEET_CSV_URL";
+fetch(DATA_URL).then(r=>r.text()).then(csv=>{
+ const rows = csv.split("
+").slice(1);
+ let fam=0, ref=0, wait=0, fund=0; let boroughs=[];
+ rows.forEach(r=>{ const [b,a,f,re,w,fu]=r.split(","); fam+=+f; ref+=+re; wait+=+w; fund+=+fu; boroughs.push({b,a}); });
+ document.getElementById("kpis").innerHTML = `<div class="kpi">Families ${fam}</div><div class="kpi">Referrals ${ref}</div><div class="kpi">Waitlist ${wait}</div><div class="kpi">£${fund}</div>`;
+ const sel=document.getElementById("boroughSelect"); sel.innerHTML='<option>Select borough</option>';
+ boroughs.forEach(o=>sel.innerHTML+=`<option>${o.b}</option>`);
+ sel.onchange=()=>{ const s=boroughs.find(o=>o.b===sel.value && o.a==='TRUE'); document.getElementById('boroughResult').innerHTML = s?'✅ Supported':'⚠️ Not supported'; };
+});
+let p=0, ps=["Pregnant?","London?","Financial difficulty?","Visa ok?","Income under £10,500?","Need support?"];
+function rp(){ parentTool.innerHTML=`<p>${ps[p]}</p><button onclick='pa(1)'>Yes</button><button onclick='pa(0)'>No</button>`; }
+function pa(a){ if(!a) parentTool.innerHTML='⚠️ Not eligible'; else if(p==ps.length-1) parentTool.innerHTML='✅ Eligible'; else {p++; rp();}}
+rp();
+let r=0, rs=["Pregnant?","London?","Financial hardship?","Visa ok?","Income ok?","Need support?","Consent?"];
+function rr(){ referralTool.innerHTML=`<p>${rs[r]}</p><button onclick='ra(1)'>Yes</button><button onclick='ra(0)'>No</button>`; }
+function ra(a){ if(!a) referralTool.innerHTML='⚠️ Not eligible'; else if(r==rs.length-1) referralTool.innerHTML='✅ Suitable'; else {r++; rr();}}
+rr();
+new Chart(document.getElementById('chart'),{type:'bar',data:{labels:['Jan','Feb','Mar'],datasets:[{data:[20,30,50],backgroundColor:'#31704B'}]}});
+slider.oninput=()=>simulation.innerHTML=`£${slider.value} could support ~${Math.floor(slider.value/100)} families`;
+</script>
+</body>
+</html>
